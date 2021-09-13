@@ -1,0 +1,19 @@
+services:
+  _defaults:
+    autowire: true
+
+  ITSC\LanguageModeSwitch\:
+    resource: '../Classes/*'
+
+  querybuilder.pages:
+    class: 'TYPO3\CMS\Core\Database\Query\QueryBuilder'
+    factory:
+      - '@TYPO3\CMS\Core\Database\ConnectionPool'
+      - 'getQueryBuilderForTable'
+    arguments:
+      - 'pages'
+
+  ITSC\LanguageModeSwitch\Middleware\Frontend\LanguageModeSwitch:
+    public: true
+    arguments:
+      - '@querybuilder.pages'

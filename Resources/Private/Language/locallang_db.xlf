@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<xliff version="1.0">
+    <file source-language="en" datatype="plaintext" original="messages" date="2021-09-12T14:00:00Z" product-name="language_mode_switch">
+        <header/>
+        <body>
+            <trans-unit id="pages.l10n_mode">
+                <source>Language Fallback Type</source>
+            </trans-unit>
+            <trans-unit id="pages.l10n_mode.description">
+                <source>This will change system wide language handling for this page in this language only.
+                    This value will set the legacy sys_language_mode handling for this page only, no inheritance.
+                    Use with care!</source>
+            </trans-unit>
+            <trans-unit id="pages.l10n_mode.strict">
+                <source>Strict: Show only translated content, based on overlays</source>
+            </trans-unit>
+            <trans-unit id="pages.l10n_mode.fallback">
+                <source>Fallback: Show default language if no translation exists</source>
+            </trans-unit>
+            <trans-unit id="pages.l10n_mode.free">
+                <source>Free mode: Ignore translation and overlay concept, only show data from selected language</source>
+            </trans-unit>
+        </body>
+    </file>
+</xliff>

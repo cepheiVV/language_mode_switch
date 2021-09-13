@@ -1,0 +1,32 @@
+{
+  "name": "itsc/language-mode-switch",
+  "type": "typo3-cms-extension",
+  "description": "Allows to switch the language mode in page level",
+  "keywords": [
+    "TYPO3 CMS extension",
+    "language switch",
+    "language fallback"
+  ],
+  "license": [
+    "GPL-2.0-or-later"
+  ],
+  "authors": [
+    {
+      "name": "Daniel Siepmann",
+      "homepage": "https://daniel-siepmann.de/"
+    },
+    {
+      "name": "Patrick Crausaz",
+      "homepage": "https://its-crausaz.ch/"
+    }
+  ],
+  "require": {
+    "typo3/cms-core": "^10.4"
+  },
+  "autoload": {
+    "psr-4": {
+      "ITSC\\LanguageModeSwitch\\": "Classes/"
+    }
+  }
+}
+

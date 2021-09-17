@@ -27,6 +27,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use TYPO3\CMS\Core\Cache\Frontend\FrontendInterface;
+use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
 use TYPO3\CMS\Core\Routing\PageArguments;
 use TYPO3\CMS\Core\Site\Entity\SiteLanguage;
@@ -48,6 +49,11 @@ class LanguageModeSwitch implements MiddlewareInterface
     private $cache;
 
     /**
+     * @var bool
+     */
+    private $enableAutomaticMode;
+
+    /**
      * @var QueryBuilder
      */
     private $queryBuilder;
@@ -56,12 +62,13 @@ class LanguageModeSwitch implements MiddlewareInterface
      * LanguageModeSwitch constructor.
      * @param FrontendInterface $cache
      * @param QueryBuilder $queryBuilder
+     * @param ExtensionConfiguration $extensionConfiguration
      */
-    public function __construct(FrontendInterface $cache, QueryBuilder $queryBuilder)
+    public function __construct(FrontendInterface $cache, QueryBuilder $queryBuilder, ExtensionConfiguration $extensionConfiguration)
     {
         $this->cache = $cache;
+        $this->enableAutomaticMode = (bool)($extensionConfiguration->get('language_mode_switch')['automaticMode'] ?? false);
         $this->queryBuilder = $queryBuilder;
-        $this->queryBuilder->from('pages');
     }
 
     /**
@@ -94,25 +101,35 @@ class LanguageModeSwitch implements MiddlewareInterface
             return $this->cache->get($cacheKey);
         }
 
-        if ($this->pageHasStandAloneContent($pageArguments->getPageId(), $siteLanguage->getLanguageId())) {
-            return 'free';
+        $mode = $this->loadModeFromPageProperties($pageArguments->getPageId(), $siteLanguage->getLanguageId());
+        if ($mode === '' && $this->enableAutomaticMode) {
+            if ($this->pageHasStandAloneContent($pageArguments->getPageId(), $siteLanguage->getLanguageId())) {
+                return 'free';
+            } else {
+                return 'fallback';
+            }
         }
 
+        $this->cache->set($cacheKey, $mode, ['pageId_' . $pageArguments->getPageId()]);
+        return $mode;
+    }
+
+    private function loadModeFromPageProperties(int $pageId, int $languageId): string
+    {
         $queryBuilder = clone $this->queryBuilder;
         $queryBuilder->select('l10n_mode');
+        $queryBuilder->from('pages');
         $queryBuilder->where(
             $queryBuilder->expr()->eq(
                 'l10n_parent',
-                $queryBuilder->createNamedParameter($pageArguments->getPageId())
+                $queryBuilder->createNamedParameter($pageId, \PDO::PARAM_INT)
             ),
             $queryBuilder->expr()->eq(
                 'sys_language_uid',
-                $queryBuilder->createNamedParameter($siteLanguage->getLanguageId())
+                $queryBuilder->createNamedParameter($languageId, \PDO::PARAM_INT)
             )
         );
-        $mode = $queryBuilder->execute()->fetchOne();
-        $this->cache->set($cacheKey, $mode, ['pageId_' . $pageArguments->getPageId()]);
-        return $mode;
+        return $queryBuilder->execute()->fetchOne();
     }
 
     private function missesRequirements(
@@ -137,5 +154,28 @@ class LanguageModeSwitch implements MiddlewareInterface
                 'fallbackType' => $mode,
             ])
         );
+    }
+
+    private function pageHasStandAloneContent(int $pageId, int $languageId): bool
+    {
+        $queryBuilder = clone $this->queryBuilder;
+        $queryBuilder->select('uid');
+        $queryBuilder->from('tt_content');
+        $queryBuilder->where(
+            $queryBuilder->expr()->eq(
+                'pid',
+                $queryBuilder->createNamedParameter($pageId, \PDO::PARAM_INT)
+            ),
+            $queryBuilder->expr()->eq(
+                'l18n_parent',
+                $queryBuilder->createNamedParameter(0, \PDO::PARAM_INT)
+            ),
+            $queryBuilder->expr()->eq(
+                'sys_language_uid',
+                $queryBuilder->createNamedParameter($languageId)
+            )
+        );
+        $queryBuilder->setMaxResults(1);
+        return (bool)$queryBuilder->execute()->fetchOne();
     }
 }

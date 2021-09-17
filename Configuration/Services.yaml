@@ -16,4 +16,5 @@ services:
   ITSC\LanguageModeSwitch\Middleware\Frontend\LanguageModeSwitch:
     public: true
     arguments:
+      - '@cache.pages'
       - '@querybuilder.pages'

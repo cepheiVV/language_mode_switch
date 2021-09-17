@@ -26,6 +26,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use TYPO3\CMS\Core\Cache\Frontend\FrontendInterface;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
 use TYPO3\CMS\Core\Routing\PageArguments;
 use TYPO3\CMS\Core\Site\Entity\SiteLanguage;
@@ -42,16 +43,23 @@ use TYPO3\CMS\Core\Site\Entity\SiteLanguage;
 class LanguageModeSwitch implements MiddlewareInterface
 {
     /**
+     * @var FrontendInterface
+     */
+    private $cache;
+
+    /**
      * @var QueryBuilder
      */
     private $queryBuilder;
 
     /**
      * LanguageModeSwitch constructor.
+     * @param FrontendInterface $cache
      * @param QueryBuilder $queryBuilder
      */
-    public function __construct(QueryBuilder $queryBuilder)
+    public function __construct(FrontendInterface $cache, QueryBuilder $queryBuilder)
     {
+        $this->cache = $cache;
         $this->queryBuilder = $queryBuilder;
         $this->queryBuilder->from('pages');
     }
@@ -81,6 +89,15 @@ class LanguageModeSwitch implements MiddlewareInterface
             return '';
         }
 
+        $cacheKey = 'customTranslationMode_' . $pageArguments->getPageId() . '_' . $siteLanguage->getLanguageId();
+        if ($this->cache->has($cacheKey)) {
+            return $this->cache->get($cacheKey);
+        }
+
+        if ($this->pageHasStandAloneContent($pageArguments->getPageId(), $siteLanguage->getLanguageId())) {
+            return 'free';
+        }
+
         $queryBuilder = clone $this->queryBuilder;
         $queryBuilder->select('l10n_mode');
         $queryBuilder->where(
@@ -93,8 +110,9 @@ class LanguageModeSwitch implements MiddlewareInterface
                 $queryBuilder->createNamedParameter($siteLanguage->getLanguageId())
             )
         );
-
-        return $queryBuilder->execute()->fetchColumn();
+        $mode = $queryBuilder->execute()->fetchOne();
+        $this->cache->set($cacheKey, $mode, ['pageId_' . $pageArguments->getPageId()]);
+        return $mode;
     }
 
     private function missesRequirements(

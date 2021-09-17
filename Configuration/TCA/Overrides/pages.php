@@ -12,6 +12,7 @@ $additionalPagesColumns = [
         'exclude' => true,
         'label' => $ll . 'pages.l10n_mode',
         'description' => $ll . 'pages.l10n_mode.description',
+        'displayCond' => 'FIELD:l10n_parent:!=:0',
         'config' => [
             'type' => 'select',
             'renderType' => 'selectSingle',

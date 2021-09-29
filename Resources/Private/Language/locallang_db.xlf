@@ -3,6 +3,9 @@
     <file source-language="en" datatype="plaintext" original="messages" date="2021-09-12T14:00:00Z" product-name="language_mode_switch">
         <header/>
         <body>
+            <trans-unit id="ext_conf.automaticMode">
+                <source>Enable Automatic Mode: When the page module says "connected", then fallback mode will be used. If it says "free", free mode will be used.</source>
+            </trans-unit>
             <trans-unit id="pages.l10n_mode">
                 <source>Language Fallback Type</source>
             </trans-unit>
@@ -10,6 +13,12 @@
                 <source>This will change system wide language handling for this page in this language only.
                     This value will set the legacy sys_language_mode handling for this page only, no inheritance.
                     Use with care!</source>
+            </trans-unit>
+            <trans-unit id="pages.l10n_mode.automatic">
+                <source>Automatic: Uses "Fallback" if the page module says Connected Mode and "Free" if the page module says Free Mode.</source>
+            </trans-unit>
+            <trans-unit id="pages.l10n_mode.default">
+                <source>Default: Uses the global default setting for this language</source>
             </trans-unit>
             <trans-unit id="pages.l10n_mode.strict">
                 <source>Strict: Show only translated content, based on overlays</source>

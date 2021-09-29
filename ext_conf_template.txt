@@ -1,0 +1,2 @@
+# cat=Features; type=boolean; label=LLL:EXT:language_mode_switch/Resources/Private/Language/locallang_db.xlf:ext_conf.automaticMode
+automaticMode = 0

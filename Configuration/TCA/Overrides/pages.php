@@ -34,5 +34,5 @@ $additionalPagesColumns = [
     'pages',
     'l10n_mode',
     '',
-    'after:php_tree_stop'
+    'after:l18n_cfg'
 );

@@ -27,6 +27,11 @@
     "psr-4": {
       "ITSC\\LanguageModeSwitch\\": "Classes/"
     }
+  },
+  "extra": {
+    "typo3/cms": {
+      "extension-key": "language_mode_switch"
+    }
   }
 }
 
